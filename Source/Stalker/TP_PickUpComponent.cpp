@@ -1,31 +1,28 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "TP_PickUpComponent.h"
-
-UTP_PickUpComponent::UTP_PickUpComponent()
+//-------------------------------------------------------------------------------------------------------------
+UTP_Pick_UpComponent::UTP_Pick_UpComponent()
 {
-	// Setup the Sphere Collision
-	SphereRadius = 32.f;
+	SphereRadius = 32.0f;	// Setup the Sphere Collision
 }
-
-void UTP_PickUpComponent::BeginPlay()
+//-------------------------------------------------------------------------------------------------------------
+void UTP_Pick_UpComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Register our Overlap Event
-	OnComponentBeginOverlap.AddDynamic(this, &UTP_PickUpComponent::OnSphereBeginOverlap);
+	OnComponentBeginOverlap.AddDynamic(this, &UTP_Pick_UpComponent::OnSphereBeginOverlap);	// Register our Overlap Event
 }
-
-void UTP_PickUpComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//-------------------------------------------------------------------------------------------------------------
+void UTP_Pick_UpComponent::OnSphereBeginOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
 	// Checking if it is a First Person Character overlapping
-	AStalker_Character* Character = Cast<AStalker_Character>(OtherActor);
+	AStalker_Character *Character = Cast<AStalker_Character>(OtherActor);
 	if(Character != nullptr)
 	{
 		// Notify that the actor is being picked up
-		OnPickUp.Broadcast(Character);
+		On_Pick_Up.Broadcast(Character);
 
 		// Unregister from the Overlap Event so it is no longer triggered
 		OnComponentBeginOverlap.RemoveAll(this);
 	}
 }
+//-------------------------------------------------------------------------------------------------------------
