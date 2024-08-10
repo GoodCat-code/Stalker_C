@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
 #include "Stalker_Character.h"
-#include "TP_PickUpComponent.generated.h"
+#include "TP_PickUp_Component.generated.h"
 //-------------------------------------------------------------------------------------------------------------
 // Declaration of the delegate that will be called when someone picks this up
 // The character picking this up is the parameter sent with the notification
@@ -20,9 +20,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction") FOn_Pick_Up On_Pick_Up;	// Delegate to whom anyone can subscribe to receive this event
 
 protected:
+	virtual void BeginPlay() override;
 
-	virtual void BeginPlay() override;	// Called when the game starts
-
-	UFUNCTION() void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);	//Code for when something overlaps this component
+	UFUNCTION() void On_Sphere_Begin_Overlap(UPrimitiveComponent *overlapped_component, AActor *other_actor, UPrimitiveComponent *other_comp, int other_body_index,  bool from_sweep, const FHitResult &sweep_result);	//Code for when something overlaps this component
 };
 //-------------------------------------------------------------------------------------------------------------
