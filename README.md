@@ -1,3 +1,3 @@
 # Stalker
 
-Developed with Unreal Engine 5
+C++ training 5
