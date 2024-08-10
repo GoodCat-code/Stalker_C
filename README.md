@@ -1,3 +1,3 @@
 # Stalker
 
-C++ training 5
+C++ training
