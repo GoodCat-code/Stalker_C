@@ -1,5 +1,6 @@
-#include "Stalker_Character.h"
-#include "Stalker_Projectile.h"
+#include "AWeapon.h"
+//#include "Stalker_Character.h"
+//#include "Stalker_Projectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -35,6 +36,26 @@ AStalker_Character::AStalker_Character()
 
 }
 //-------------------------------------------------------------------------------------------------------------
+bool AStalker_Character::Pickup_Weapon(AWeapon *weapon)
+{
+
+	if (weapon == 0)	// Check that the weapon is valid
+		return false;
+
+	if (Current_Weapon !=0)
+		Current_Weapon->Detach();
+
+	Current_Weapon = weapon;
+
+	// Attach the weapon to the First Person Character
+	FAttachmentTransformRules attachment_rules(EAttachmentRule::SnapToTarget, true);
+	AttachToComponent(Mesh_1P, attachment_rules, FName(TEXT("GripPoint")));
+
+	//Character->AddInstanceComponent(this);	// add the weapon as an instance component to the character
+
+	return true;
+}
+//-------------------------------------------------------------------------------------------------------------
 void AStalker_Character::BeginPlay()
 {
 	Super::BeginPlay();
@@ -49,8 +70,10 @@ void AStalker_Character::SetupPlayerInputComponent(UInputComponent *input_compon
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AStalker_Character::Move);
-
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AStalker_Character::Look);
+
+		EnhancedInputComponent->BindAction(Fire_Action, ETriggerEvent::Triggered, this, &AStalker_Character::Fire);
+
 	}
 	else
 	{
@@ -82,5 +105,11 @@ void AStalker_Character::Look(const FInputActionValue &value)
 		AddControllerYawInput(look_axis_vector.X);
 		AddControllerPitchInput(look_axis_vector.Y);
 	}
+}
+//-------------------------------------------------------------------------------------------------------------
+void AStalker_Character::Fire(const FInputActionValue &value)
+{
+	if (Current_Weapon !=0)
+		Current_Weapon->Fire(this);
 }
 //-------------------------------------------------------------------------------------------------------------
