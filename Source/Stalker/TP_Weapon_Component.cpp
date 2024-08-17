@@ -64,7 +64,6 @@ void UTP_WeaponComponent::Fire()
 			world->SpawnActor<AStalker_Projectile>(ProjectileClass, spawn_location, spawn_rotation, actor_spawn_params);	// Spawn the projectile at the muzzle
 		}
 	}
-	//-------------------------------------------------------------------------------------------------------------
 	if (FireSound != 0)
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());	// Try and play the sound if specified
 	
