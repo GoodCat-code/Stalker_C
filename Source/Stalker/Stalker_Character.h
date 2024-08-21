@@ -32,13 +32,12 @@ protected:
 	virtual void BeginPlay();
 	virtual void SetupPlayerInputComponent(UInputComponent *input_component);
 
+private:
 	void On_Action_Move(const FInputActionValue &value); // Called for movement input
 	void On_Action_Look(const FInputActionValue &value); // Called for looking input
-
 	void On_Action_Fire(const FInputActionValue &value); // Called for fire input
 	void On_Action_Use(const FInputActionValue &value); // Called for use input
 
-private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true")) UCameraComponent *FirstPersonCameraComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true")) UInputAction *Action_Jump;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true")) UInputAction *Action_Move;
