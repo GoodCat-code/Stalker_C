@@ -66,14 +66,13 @@ void AStalker_Character::SetupPlayerInputComponent(UInputComponent *input_compon
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(input_component))
 	{
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump );
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(Action_Jump, ETriggerEvent::Started, this, &ACharacter::Jump );
+		EnhancedInputComponent->BindAction(Action_Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AStalker_Character::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AStalker_Character::Look);
-
-		EnhancedInputComponent->BindAction(Fire_Action, ETriggerEvent::Triggered, this, &AStalker_Character::Fire);
-
+		EnhancedInputComponent->BindAction(Action_Move, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Move);
+		EnhancedInputComponent->BindAction(Action_Look, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Look);
+		EnhancedInputComponent->BindAction(Action_Fire, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Fire);
+		EnhancedInputComponent->BindAction(Action_Use, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Use);
 	}
 	else
 	{
@@ -81,7 +80,7 @@ void AStalker_Character::SetupPlayerInputComponent(UInputComponent *input_compon
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
-void AStalker_Character::Move(const FInputActionValue &value)
+void AStalker_Character::On_Action_Move(const FInputActionValue &value)
 {
 	FVector2D movement_vector = value.Get<FVector2D>(); // input is a Vector2D
 
@@ -94,7 +93,7 @@ void AStalker_Character::Move(const FInputActionValue &value)
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
-void AStalker_Character::Look(const FInputActionValue &value)
+void AStalker_Character::On_Action_Look(const FInputActionValue &value)
 {// input is a Vector2D
 	
 	FVector2D look_axis_vector = value.Get<FVector2D>();
@@ -107,9 +106,13 @@ void AStalker_Character::Look(const FInputActionValue &value)
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
-void AStalker_Character::Fire(const FInputActionValue &value)
+void AStalker_Character::On_Action_Fire(const FInputActionValue &value)
 {
 	if (Current_Weapon !=0)
 		Current_Weapon->Fire(this);
+}
+//-------------------------------------------------------------------------------------------------------------
+void AStalker_Character::On_Action_Use(const FInputActionValue &value)
+{
 }
 //-------------------------------------------------------------------------------------------------------------
