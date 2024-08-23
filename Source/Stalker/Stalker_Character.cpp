@@ -1,6 +1,6 @@
 #include "Stalker_Character.h"
 #include "Stalker_Projectile.h"
-#include "AWeapon.h"
+//#include "AWeapon.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -34,26 +34,6 @@ AStalker_Character::AStalker_Character()
 	//Mesh_1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh_1P->SetRelativeLocation(FVector(-30.0f, 0.0f, -150.0f));
 
-}
-//-------------------------------------------------------------------------------------------------------------
-bool AStalker_Character::Pickup_Weapon(AWeapon *weapon)
-{
-
-	if (weapon == 0)	// Check that the weapon is valid
-		return false;
-
-	if (Current_Weapon !=0)
-		Current_Weapon->Detach();
-
-	Current_Weapon = weapon;
-
-	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules attachment_rules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(Mesh_1P, attachment_rules, FName(TEXT("GripPoint")));
-
-	//Character->AddInstanceComponent(this);	// add the weapon as an instance component to the character
-
-	return true;
 }
 //-------------------------------------------------------------------------------------------------------------
 void AStalker_Character::BeginPlay()
@@ -114,5 +94,58 @@ void AStalker_Character::On_Action_Fire(const FInputActionValue &value)
 //-------------------------------------------------------------------------------------------------------------
 void AStalker_Character::On_Action_Use(const FInputActionValue &value)
 {
+	int i;
+	double distance, min_distance;
+	AActor *item, *curr_item;
+	FVector player_pos, item_pos;
+
+	if (Interactable_Actors.Num() == 0)
+		return;
+
+	if (Interactable_Actors.Num() == 1)
+	{
+		item = Interactable_Actors[0];
+		Interactable_Actors.RemoveAt(0);
+	}
+	else
+	{
+		player_pos = GetActorLocation();
+		for (i = 0; i < Interactable_Actors.Num(); i++)
+		{
+			curr_item = Interactable_Actors[i];
+			item_pos = curr_item->GetActorLocation();
+			distance = FVector::Distance(player_pos, item_pos);
+
+			if (i ==0 || distance < min_distance)
+				min_distance = distance;
+				item = curr_item;
+		}
+
+		Interactable_Actors.Remove(item);
+	}
+
+	if (AWeapon *weapon = Cast<AWeapon> (item) )
+		Pickup_Weapon(weapon);
+
+	//if (weapon !=0 && Cast<AWeapon> (item))
+	//	weapon->Detach();
+	//	AWeapon *weapon = Cast<AWeapon> (item);
+	//	Pickup_Weapon(weapon);
+
+}
+//-------------------------------------------------------------------------------------------------------------
+bool AStalker_Character::Pickup_Weapon(AWeapon *weapon)
+{
+
+	if (weapon == 0)	// Check that the weapon is valid
+		return false;
+
+	if (Current_Weapon !=0)
+		Current_Weapon->Detach();
+
+	Current_Weapon = weapon;
+	Current_Weapon->Attach(Mesh_1P);
+
+	return true;
 }
 //-------------------------------------------------------------------------------------------------------------
