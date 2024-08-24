@@ -1,6 +1,6 @@
 #include "Stalker_Character.h"
 #include "Stalker_Projectile.h"
-#include "AWeapon.h"
+//#include "AWeapon.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -36,26 +36,6 @@ AStalker_Character::AStalker_Character()
 
 }
 //-------------------------------------------------------------------------------------------------------------
-bool AStalker_Character::Pickup_Weapon(AWeapon *weapon)
-{
-
-	if (weapon == 0)	// Check that the weapon is valid
-		return false;
-
-	if (Current_Weapon !=0)
-		Current_Weapon->Detach();
-
-	Current_Weapon = weapon;
-
-	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules attachment_rules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(Mesh_1P, attachment_rules, FName(TEXT("GripPoint")));
-
-	//Character->AddInstanceComponent(this);	// add the weapon as an instance component to the character
-
-	return true;
-}
-//-------------------------------------------------------------------------------------------------------------
 void AStalker_Character::BeginPlay()
 {
 	Super::BeginPlay();
@@ -66,14 +46,13 @@ void AStalker_Character::SetupPlayerInputComponent(UInputComponent *input_compon
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(input_component))
 	{
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump );
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(Action_Jump, ETriggerEvent::Started, this, &ACharacter::Jump );
+		EnhancedInputComponent->BindAction(Action_Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AStalker_Character::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AStalker_Character::Look);
-
-		EnhancedInputComponent->BindAction(Fire_Action, ETriggerEvent::Triggered, this, &AStalker_Character::Fire);
-
+		EnhancedInputComponent->BindAction(Action_Move, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Move);
+		EnhancedInputComponent->BindAction(Action_Look, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Look);
+		EnhancedInputComponent->BindAction(Action_Fire, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Fire);
+		EnhancedInputComponent->BindAction(Action_Use, ETriggerEvent::Triggered, this, &AStalker_Character::On_Action_Use);
 	}
 	else
 	{
@@ -81,7 +60,7 @@ void AStalker_Character::SetupPlayerInputComponent(UInputComponent *input_compon
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
-void AStalker_Character::Move(const FInputActionValue &value)
+void AStalker_Character::On_Action_Move(const FInputActionValue &value)
 {
 	FVector2D movement_vector = value.Get<FVector2D>(); // input is a Vector2D
 
@@ -94,7 +73,7 @@ void AStalker_Character::Move(const FInputActionValue &value)
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
-void AStalker_Character::Look(const FInputActionValue &value)
+void AStalker_Character::On_Action_Look(const FInputActionValue &value)
 {// input is a Vector2D
 	
 	FVector2D look_axis_vector = value.Get<FVector2D>();
@@ -107,9 +86,66 @@ void AStalker_Character::Look(const FInputActionValue &value)
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
-void AStalker_Character::Fire(const FInputActionValue &value)
+void AStalker_Character::On_Action_Fire(const FInputActionValue &value)
 {
 	if (Current_Weapon !=0)
 		Current_Weapon->Fire(this);
+}
+//-------------------------------------------------------------------------------------------------------------
+void AStalker_Character::On_Action_Use(const FInputActionValue &value)
+{
+	int i;
+	double distance, min_distance;
+	AActor *item, *curr_item;
+	FVector player_pos, item_pos;
+
+	if (Interactable_Actors.Num() == 0)
+		return;
+
+	if (Interactable_Actors.Num() == 1)
+	{
+		item = Interactable_Actors[0];
+		Interactable_Actors.RemoveAt(0);
+	}
+	else
+	{
+		player_pos = GetActorLocation();
+		for (i = 0; i < Interactable_Actors.Num(); i++)
+		{
+			curr_item = Interactable_Actors[i];
+			item_pos = curr_item->GetActorLocation();
+			distance = FVector::Distance(player_pos, item_pos);
+
+			if (i ==0 || distance < min_distance)
+				min_distance = distance;
+				item = curr_item;
+		}
+
+		Interactable_Actors.Remove(item);
+	}
+
+	if (AWeapon *weapon = Cast<AWeapon> (item) )
+		Pickup_Weapon(weapon);
+
+	//if (weapon !=0 && Cast<AWeapon> (item))
+	//	weapon->Detach();
+	//	AWeapon *weapon = Cast<AWeapon> (item);
+	//	Pickup_Weapon(weapon);
+
+}
+//-------------------------------------------------------------------------------------------------------------
+bool AStalker_Character::Pickup_Weapon(AWeapon *weapon)
+{
+
+	if (weapon == 0)	// Check that the weapon is valid
+		return false;
+
+	if (Current_Weapon !=0)
+		Current_Weapon->Detach();
+
+	Current_Weapon = weapon;
+	Current_Weapon->Attach(Mesh_1P);
+
+	return true;
 }
 //-------------------------------------------------------------------------------------------------------------

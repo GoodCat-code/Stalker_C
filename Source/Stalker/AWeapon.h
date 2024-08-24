@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Stalker_Character.h"
 #include "Stalker_Projectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "AWeapon.generated.h"
@@ -13,6 +12,7 @@ class STALKER_API AWeapon : public AActor
 public:	
 	AWeapon();
 
+	void Attach(USkeletalMeshComponent *arms_mesh);
 	void Detach();
 
 	UFUNCTION(BlueprintCallable, Category="Weapon") void Fire(AStalker_Character *character);	// Make the weapon Fire a Projectile
