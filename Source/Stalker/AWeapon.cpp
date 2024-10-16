@@ -1,5 +1,6 @@
 #include "AWeapon.h"
 #include "Stalker_Character.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 //-------------------------------------------------------------------------------------------------------------
 AWeapon::AWeapon()
@@ -32,6 +33,25 @@ void AWeapon::Detach()
 	}
 }
 //-------------------------------------------------------------------------------------------------------------
+void AWeapon::Attach_To_Socket(USkeletalMeshComponent *character_mesh, FName arm_socket_name)
+{	
+	USceneComponent *root_component = GetRootComponent();
+	if (UPrimitiveComponent *prim_component = Cast<UPrimitiveComponent>(root_component) )
+	{
+		prim_component->SetSimulatePhysics(false);
+		prim_component->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	}
+
+	// Attach the weapon to the First Person Character
+	//FAttachmentTransformRules attachment_rules(EAttachmentRule::SnapToTarget, true);
+	//AttachToComponent(character_mesh, attachment_rules, arm_socket_name);
+
+	if (const USkeletalMeshSocket *weapon_socket = character_mesh->GetSocketByName(arm_socket_name) )
+		weapon_socket->AttachActor(this, character_mesh);
+	else
+		UE_LOG(LogTemp, Warning, TEXT("[%S]>>>>> No socket: %s"), __FUNCTION__, *(arm_socket_name.ToString() ) );
+}
+//-------------------------------------------------------------------------------------------------------------
 void AWeapon::Fire(AStalker_Character *character)
 {
 	if (character == 0 || character->GetController() == 0)
@@ -56,9 +76,18 @@ void AWeapon::Fire(AStalker_Character *character)
 	if (Fire_Sound != 0)
 		UGameplayStatics::PlaySoundAtLocation(this, Fire_Sound, character->GetActorLocation());	// Try and play the sound if specified
 
-	if (Fire_Animation != 0)
-		if (UAnimInstance *anim_instance = character->Mesh_1P->GetAnimInstance() )
-			anim_instance->Montage_Play(Fire_Animation, 1.0f);	// Try and play a firing animation if specified
-
+	//if (Fire_Animation != 0)
+	//{
+	//	if (UAnimInstance *anim_instance = character->Mesh_1P->GetAnimInstance() )
+	//		anim_instance->Montage_Play(Fire_Animation, 1.0f);	// Try and play a firing animation if specified
+	//}
 }
-	//-------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------
+void AWeapon::Fire_NPC()
+{
+	if (Fire_Animation != 0)
+	{
+		BP_Weapon_Mesh_Component->PlayAnimation(Fire_Animation, false);
+	}
+}
+//-------------------------------------------------------------------------------------------------------------
